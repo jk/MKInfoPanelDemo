@@ -35,6 +35,8 @@
 @synthesize thumbImage = _thumbImage;
 @synthesize backgroundGradient = _backgroundGradient;
 @synthesize onTouched = _onTouched;
+@synthesize delegate = _delegate;
+@synthesize onFinished = _onFinished;
 
 - (void)setup {
     self.onTouched = @selector(hidePanel);    
@@ -132,6 +134,8 @@
 
 -(void) hidePanel
 {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    
     CATransition *transition = [CATransition animation];
 	transition.duration = 0.25;
 	transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
@@ -149,6 +153,8 @@
 
 - (void)dealloc
 {
+    [_delegate performSelector:_onFinished];
+    [_delegate release];
     [super dealloc];
 }
 
