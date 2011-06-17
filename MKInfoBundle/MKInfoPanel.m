@@ -34,12 +34,25 @@
 @synthesize detailLabel = _detailLabel;
 @synthesize thumbImage = _thumbImage;
 @synthesize backgroundGradient = _backgroundGradient;
+@synthesize onTouched = _onTouched;
+
+- (void)setup {
+    self.onTouched = @selector(hidePanel);    
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
+        [self setup];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self setup];
     }
     return self;
 }
@@ -128,6 +141,10 @@
     self.frame = CGRectMake(0, -self.frame.size.height, 320, self.frame.size.height); 
     
     [self performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0.25];
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self performSelector:_onTouched];
 }
 
 - (void)dealloc
