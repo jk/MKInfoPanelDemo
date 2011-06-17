@@ -81,7 +81,7 @@
     return panel;
 }
 
-+(void) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
++(MKInfoPanel*) showPanelHelper:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
 {
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
     [panel setType:type];
@@ -100,29 +100,25 @@
     }
     
     [view addSubview:panel];
-    [panel performSelector:@selector(hidePanel) withObject:view afterDelay:interval];
+    [panel performSelector:@selector(hidePanel) withObject:view afterDelay:interval]; 
+    
+    return panel;
+}
+
++(void) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
+{    
+    MKInfoPanel *panel = [self showPanelHelper:view type:type title:title subtitle:subtitle hideAfter:interval];
 }
 
 +(void) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
 {
-    MKInfoPanel *panel = [MKInfoPanel infoPanel];
-    [panel setType:type];
-    panel.titleLabel.text = title;
-    if(subtitle)
-    {
-        panel.detailLabel.text = subtitle;
-    }
-    else
-    {
-        panel.detailLabel.hidden = YES;
-        panel.frame = CGRectMake(0, 20, 320, 50);
-        panel.thumbImage.frame = CGRectMake(15, 5, 35, 35);
-        panel.titleLabel.frame = CGRectMake(57, 12, 240, 21);
-        
-    }
+    MKInfoPanel *panel = [self showPanelHelper:window type:type title:title subtitle:subtitle hideAfter:interval];
     
-    [window addSubview:panel];
-    [panel performSelector:@selector(hidePanel) withObject:window afterDelay:interval];
+    if (![UIApplication sharedApplication].statusBarHidden) {
+        CGRect frame = panel.frame;
+        frame.origin.y += [UIApplication sharedApplication].statusBarFrame.size.height;
+        panel.frame = frame;
+    }
 }
 
 -(void) hidePanel
