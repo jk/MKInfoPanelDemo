@@ -40,8 +40,8 @@ typedef enum MKInfoPanelType_
 @property (nonatomic, assign) IBOutlet UIImageView *thumbImage;
 @property (nonatomic, assign) IBOutlet UIImageView *backgroundGradient;
 
-+(void) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
++(MKInfoPanel*) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
 
-+(void) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
++(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
 
 @end

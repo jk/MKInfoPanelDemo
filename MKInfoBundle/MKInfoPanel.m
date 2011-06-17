@@ -70,7 +70,6 @@
     MKInfoPanel *panel =  (MKInfoPanel*) [[[UINib nibWithNibName:@"MKInfoPanel" bundle:nil] 
                                            instantiateWithOwner:self options:nil] objectAtIndex:0];
 
-    
     CATransition *transition = [CATransition animation];
 	transition.duration = 0.25;
 	transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
@@ -81,8 +80,8 @@
     return panel;
 }
 
-+(MKInfoPanel*) showPanelHelper:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
-{
++(MKInfoPanel*) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
+{    
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
     [panel setType:type];
     panel.titleLabel.text = title;
@@ -105,20 +104,17 @@
     return panel;
 }
 
-+(void) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
-{    
-    MKInfoPanel *panel = [self showPanelHelper:view type:type title:title subtitle:subtitle hideAfter:interval];
-}
-
-+(void) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
++(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
 {
-    MKInfoPanel *panel = [self showPanelHelper:window type:type title:title subtitle:subtitle hideAfter:interval];
+    MKInfoPanel *panel = [self showPanelInView:window type:type title:title subtitle:subtitle hideAfter:interval];
     
     if (![UIApplication sharedApplication].statusBarHidden) {
         CGRect frame = panel.frame;
         frame.origin.y += [UIApplication sharedApplication].statusBarFrame.size.height;
         panel.frame = frame;
     }
+    
+    return panel;
 }
 
 -(void) hidePanel
