@@ -77,7 +77,7 @@
 #pragma mark Setter/Getter
 ////////////////////////////////////////////////////////////////////////
 
--(void) setType:(MKInfoPanelType)type {
+-(void)setType:(MKInfoPanelType)type {
     if(type == MKInfoPanelTypeError) {
         self.backgroundGradient.image = [[UIImage imageNamed:@"Red"] stretchableImageWithLeftCapWidth:1 topCapHeight:5];
         self.titleLabel.font = [UIFont boldSystemFontOfSize:14];
@@ -100,7 +100,11 @@
 #pragma mark Show/Hide
 ////////////////////////////////////////////////////////////////////////
 
-+(MKInfoPanel*) showPanelInView:(UIView*)view type:(MKInfoPanelType)type title:(NSString*)title subtitle:(NSString*)subtitle hideAfter:(NSTimeInterval)interval {    
++ (MKInfoPanel *)showPanelInView:(UIView *)view type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle {
+    return [self showPanelInView:view type:type title:title subtitle:subtitle hideAfter:-1];
+}
+
++(MKInfoPanel *)showPanelInView:(UIView *)view type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle hideAfter:(NSTimeInterval)interval {    
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
     
     panel.type = type;
@@ -117,12 +121,19 @@
     }
     
     [view addSubview:panel];
-    [panel performSelector:@selector(hidePanel) withObject:view afterDelay:interval]; 
+    
+    if (interval > 0) {
+        [panel performSelector:@selector(hidePanel) withObject:view afterDelay:interval]; 
+    }
     
     return panel;
 }
 
-+(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval {
++ (MKInfoPanel *)showPanelInWindow:(UIWindow *)window type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle {
+    return [self showPanelInWindow:window type:type title:title subtitle:subtitle hideAfter:-1];
+}
+
++(MKInfoPanel *)showPanelInWindow:(UIWindow *)window type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle hideAfter:(NSTimeInterval)interval {
     MKInfoPanel *panel = [self showPanelInView:window type:type title:title subtitle:subtitle hideAfter:interval];
     
     if (![UIApplication sharedApplication].statusBarHidden) {
@@ -134,7 +145,7 @@
     return panel;
 }
 
--(void) hidePanel {
+-(void)hidePanel {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     
     CATransition *transition = [CATransition animation];
@@ -143,7 +154,7 @@
 	transition.type = kCATransitionPush;	
 	transition.subtype = kCATransitionFromTop;
 	[self.layer addAnimation:transition forKey:nil];
-    self.frame = CGRectMake(0, -self.frame.size.height, 320, self.frame.size.height); 
+    self.frame = CGRectMake(0, -self.frame.size.height, self.frame.size.width, self.frame.size.height); 
     
     [self performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0.25];
 }
@@ -162,7 +173,7 @@
 #pragma mark Private
 ////////////////////////////////////////////////////////////////////////
 
-+(MKInfoPanel*) infoPanel {
++(MKInfoPanel *)infoPanel {
     MKInfoPanel *panel =  (MKInfoPanel*) [[[UINib nibWithNibName:@"MKInfoPanel" bundle:nil] 
                                            instantiateWithOwner:self options:nil] objectAtIndex:0];
     
