@@ -21,15 +21,20 @@
 #import <QuartzCore/QuartzCore.h>
 
 // Private Methods
-// this should be added before implementation block 
 
-@interface MKInfoPanel (PrivateMethods)
+@interface MKInfoPanel ()
+
 @property (nonatomic, assign) MKInfoPanelType type;
+
 + (MKInfoPanel*) infoPanel;
+
+- (void)setup;
+
 @end
 
 
 @implementation MKInfoPanel
+
 @synthesize titleLabel = _titleLabel;
 @synthesize detailLabel = _detailLabel;
 @synthesize thumbImage = _thumbImage;
@@ -37,13 +42,15 @@
 @synthesize onTouched = _onTouched;
 @synthesize delegate = _delegate;
 @synthesize onFinished = _onFinished;
+@synthesize type = type_;
 
-- (void)setup {
-    self.onTouched = @selector(hidePanel);    
-}
 
-- (id)initWithFrame:(CGRect)frame
-{
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Lifecycle
+////////////////////////////////////////////////////////////////////////
+
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         [self setup];
@@ -59,58 +66,54 @@
     return self;
 }
 
--(void) setType:(MKInfoPanelType)type
-{
-    if(type == MKInfoPanelTypeError)
-    {
+- (void)dealloc {
+    [_delegate performSelector:_onFinished];
+    
+    [super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Setter/Getter
+////////////////////////////////////////////////////////////////////////
+
+-(void) setType:(MKInfoPanelType)type {
+    if(type == MKInfoPanelTypeError) {
         self.backgroundGradient.image = [[UIImage imageNamed:@"Red"] stretchableImageWithLeftCapWidth:1 topCapHeight:5];
         self.titleLabel.font = [UIFont boldSystemFontOfSize:14];
         self.detailLabel.font = [UIFont fontWithName:@"Helvetica Neue" 
                                                 size:14];
         self.thumbImage.image = [UIImage imageNamed:@"Warning"];
         self.detailLabel.textColor = RGBA(255, 140, 140, 0.6);
-
     }
-    else if(type == MKInfoPanelTypeInfo)
-    {
+    
+    else if(type == MKInfoPanelTypeInfo) {
         self.backgroundGradient.image = [[UIImage imageNamed:@"Blue"] stretchableImageWithLeftCapWidth:1 topCapHeight:5];
         self.titleLabel.font = [UIFont boldSystemFontOfSize:15];
         self.thumbImage.image = [UIImage imageNamed:@"Tick"];   
         self.detailLabel.textColor = RGBA(210, 210, 235, 1.0);
     }
-        
-}
-+(MKInfoPanel*) infoPanel
-{
-    MKInfoPanel *panel =  (MKInfoPanel*) [[[UINib nibWithNibName:@"MKInfoPanel" bundle:nil] 
-                                           instantiateWithOwner:self options:nil] objectAtIndex:0];
-
-    CATransition *transition = [CATransition animation];
-	transition.duration = 0.25;
-	transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-	transition.type = kCATransitionPush;	
-	transition.subtype = kCATransitionFromBottom;
-	[panel.layer addAnimation:transition forKey:nil];
-    
-    return panel;
 }
 
-+(MKInfoPanel*) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
-{    
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Show/Hide
+////////////////////////////////////////////////////////////////////////
+
++(MKInfoPanel*) showPanelInView:(UIView*)view type:(MKInfoPanelType)type title:(NSString*)title subtitle:(NSString*)subtitle hideAfter:(NSTimeInterval)interval {    
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
-    [panel setType:type];
+    
+    panel.type = type;
     panel.titleLabel.text = title;
-    if(subtitle)
-    {
+    
+    if(subtitle) {
         panel.detailLabel.text = subtitle;
-    }
-    else
-    {
+        panel.frame = CGRectMake(0, 0, view.bounds.size.width, panel.frame.size.height);
+    } else {
         panel.detailLabel.hidden = YES;
-        panel.frame = CGRectMake(0, 0, 320, 50);
+        panel.frame = CGRectMake(0, 0, view.bounds.size.width, 50);
         panel.thumbImage.frame = CGRectMake(15, 5, 35, 35);
         panel.titleLabel.frame = CGRectMake(57, 12, 240, 21);
-        
     }
     
     [view addSubview:panel];
@@ -119,8 +122,7 @@
     return panel;
 }
 
-+(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval
-{
++(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval {
     MKInfoPanel *panel = [self showPanelInView:window type:type title:title subtitle:subtitle hideAfter:interval];
     
     if (![UIApplication sharedApplication].statusBarHidden) {
@@ -132,8 +134,7 @@
     return panel;
 }
 
--(void) hidePanel
-{
+-(void) hidePanel {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     
     CATransition *transition = [CATransition animation];
@@ -147,15 +148,37 @@
     [self performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0.25];
 }
 
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Touch Recognition
+////////////////////////////////////////////////////////////////////////
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [self performSelector:_onTouched];
 }
 
-- (void)dealloc
-{
-    [_delegate performSelector:_onFinished];
-    [_delegate release];
-    [super dealloc];
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark Private
+////////////////////////////////////////////////////////////////////////
+
++(MKInfoPanel*) infoPanel {
+    MKInfoPanel *panel =  (MKInfoPanel*) [[[UINib nibWithNibName:@"MKInfoPanel" bundle:nil] 
+                                           instantiateWithOwner:self options:nil] objectAtIndex:0];
+    
+    CATransition *transition = [CATransition animation];
+	transition.duration = 0.25;
+	transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+	transition.type = kCATransitionPush;	
+	transition.subtype = kCATransitionFromBottom;
+	[panel.layer addAnimation:transition forKey:nil];
+    
+    return panel;
+}
+
+- (void)setup {
+    self.onTouched = @selector(hidePanel);
+    self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 }
 
 @end

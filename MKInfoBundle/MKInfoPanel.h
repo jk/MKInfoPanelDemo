@@ -20,8 +20,7 @@
 #import <UIKit/UIKit.h>
 #define RGBA(r, g, b, a) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
 
-typedef enum MKInfoPanelType_
-{    
+typedef enum {    
     MKInfoPanelTypeInfo,
     MKInfoPanelTypeError
 } MKInfoPanelType;
@@ -38,6 +37,8 @@ typedef enum MKInfoPanelType_
     
     id _delegate;
     SEL _onFinished;
+    
+    MKInfoPanelType type_;
 }
 
 @property (nonatomic, assign) IBOutlet UILabel *titleLabel;
@@ -45,11 +46,13 @@ typedef enum MKInfoPanelType_
 @property (nonatomic, assign) IBOutlet UIImageView *thumbImage;
 @property (nonatomic, assign) IBOutlet UIImageView *backgroundGradient;
 @property (nonatomic, assign) SEL onTouched;
-@property (nonatomic, retain) id delegate;
+@property (nonatomic, assign) id delegate;
 @property (nonatomic, assign) SEL onFinished;
 
 +(MKInfoPanel*) showPanelInView:(UIView*) view type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
 
 +(MKInfoPanel*) showPanelInWindow:(UIWindow*) window type:(MKInfoPanelType) type title:(NSString*) title subtitle:(NSString*) subtitle hideAfter:(NSTimeInterval) interval;
+
+-(void) hidePanel;
 
 @end
