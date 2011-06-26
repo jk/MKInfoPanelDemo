@@ -84,7 +84,7 @@
         self.detailLabel.font = [UIFont fontWithName:@"Helvetica Neue" 
                                                 size:14];
         self.thumbImage.image = [UIImage imageNamed:@"Warning"];
-        self.detailLabel.textColor = RGBA(255, 140, 140, 0.6);
+        self.detailLabel.textColor = [UIColor colorWithRed:1.f green:0.651f blue:0.651f alpha:1.f];
     }
     
     else if(type == MKInfoPanelTypeInfo) {
@@ -106,20 +106,25 @@
 
 +(MKInfoPanel *)showPanelInView:(UIView *)view type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle hideAfter:(NSTimeInterval)interval {    
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
+    CGFloat panelHeight = 50;   // panel height when no subtitle set
     
     panel.type = type;
     panel.titleLabel.text = title;
     
     if(subtitle) {
         panel.detailLabel.text = subtitle;
-        panel.frame = CGRectMake(0, 0, view.bounds.size.width, panel.frame.size.height);
+        [panel.detailLabel sizeToFit];
+        
+        panelHeight = MAX(CGRectGetMaxY(panel.thumbImage.frame), CGRectGetMaxY(panel.detailLabel.frame));
+        panelHeight += 10.f;    // padding at bottom
     } else {
         panel.detailLabel.hidden = YES;
-        panel.frame = CGRectMake(0, 0, view.bounds.size.width, 50);
         panel.thumbImage.frame = CGRectMake(15, 5, 35, 35);
         panel.titleLabel.frame = CGRectMake(57, 12, 240, 21);
     }
     
+    // update frame of panel
+    panel.frame = CGRectMake(0, 0, view.bounds.size.width, panelHeight);
     [view addSubview:panel];
     
     if (interval > 0) {
