@@ -29,6 +29,7 @@
 + (MKInfoPanel*) infoPanel;
 
 - (void)setup;
+- (UIColor *)changeColor:(UIColor *)sourceColor withFactor:(CGFloat)factor;
 
 @end
 
@@ -78,21 +79,105 @@
 ////////////////////////////////////////////////////////////////////////
 
 -(void)setType:(MKInfoPanelType)type {
+    UIColor *startColor, *endColor;
     if(type == MKInfoPanelTypeError) {
-        self.backgroundGradient.image = [[UIImage imageNamed:@"Red"] stretchableImageWithLeftCapWidth:1 topCapHeight:5];
+        startColor = RGBA(200, 36, 0, 1.0);
+        endColor = RGBA(150, 24, 0, 1.0);
+        [self setBackgroundGradientFrom:startColor to:endColor];
+        
         self.titleLabel.font = [UIFont boldSystemFontOfSize:14];
         self.detailLabel.font = [UIFont fontWithName:@"Helvetica Neue" 
                                                 size:14];
         self.thumbImage.image = [UIImage imageNamed:@"Warning"];
-        self.detailLabel.textColor = [UIColor colorWithRed:1.f green:0.651f blue:0.651f alpha:1.f];
+        self.detailLabel.textColor = RGBA(255, 166, 166, 1.0);
     }
     
     else if(type == MKInfoPanelTypeInfo) {
-        self.backgroundGradient.image = [[UIImage imageNamed:@"Blue"] stretchableImageWithLeftCapWidth:1 topCapHeight:5];
+        startColor = RGBA(91, 134, 206, 1.0);
+        endColor = RGBA(69, 106, 177, 1.0);
+        [self setBackgroundGradientFrom:startColor to:endColor];
+        
         self.titleLabel.font = [UIFont boldSystemFontOfSize:15];
         self.thumbImage.image = [UIImage imageNamed:@"Tick"];   
         self.detailLabel.textColor = RGBA(210, 210, 235, 1.0);
     }
+    
+    else if(type == MKInfoPanelTypeNotice) {
+        startColor = RGBA(253, 178, 77, 1.0);
+        endColor = RGBA(196, 123, 20, 1.0);
+        [self setBackgroundGradientFrom:startColor to:endColor];
+        
+        self.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+        self.thumbImage.image = [UIImage imageNamed:@"Tick"];   
+        self.detailLabel.textColor = RGBA(136, 85, 24, 1.0);
+    }
+}
+
+-(void)setBackgroundGradientFrom:(UIColor *)fromColor to:(UIColor *)toColor {
+//    UIView *view = [[UIView alloc] initWithFrame:self.background.frame];
+    CAGradientLayer *gradient = [CAGradientLayer layer];
+    gradient.frame = self.backgroundGradient.bounds;
+    gradient.colors = [NSArray arrayWithObjects:(id)[fromColor CGColor], (id)[toColor CGColor], nil];
+    
+    CGFloat lineHeight = 3.0;
+    // light startline
+    CAGradientLayer *startLine = [CAGradientLayer layer];
+    startLine.frame = CGRectMake(0, 0, self.backgroundGradient.bounds.size.width, lineHeight);
+    UIColor *lightColor = [self changeColor:fromColor withFactor:1.1];
+    startLine.colors = [NSArray arrayWithObjects:(id)[fromColor CGColor], (id)[lightColor CGColor], nil];
+    
+    // dark endline
+    CAGradientLayer *endLine = [CAGradientLayer layer];
+    CGFloat endPosition = self.backgroundGradient.bounds.size.height - lineHeight;
+    endLine.frame = CGRectMake(0, endPosition, self.backgroundGradient.bounds.size.width, lineHeight);
+    UIColor *darkColor = [self changeColor:toColor withFactor:0.7];
+    endLine.colors = [NSArray arrayWithObjects:(id)[toColor CGColor], (id)[darkColor CGColor], nil];
+    
+    [self.backgroundGradient.layer insertSublayer:gradient atIndex:0];
+    [self.backgroundGradient.layer insertSublayer:startLine atIndex:1];
+    [self.backgroundGradient.layer insertSublayer:endLine atIndex:2];
+}
+
+// @see http://www.cocoanetics.com/2009/10/manipulating-uicolors/
+- (UIColor *)changeColor:(UIColor *)sourceColor withFactor:(CGFloat)factor
+{
+    // oldComponents is the array INSIDE the original color
+    // changing these changes the original, so we copy it
+    CGFloat *oldComponents = (CGFloat *)CGColorGetComponents([sourceColor CGColor]);
+    CGFloat newComponents[4];
+    
+    int numComponents = CGColorGetNumberOfComponents([sourceColor CGColor]);
+    
+    switch (numComponents)
+    {
+        case 2:
+        {
+            //grayscale
+            newComponents[0] = oldComponents[0]*factor;
+            newComponents[1] = oldComponents[0]*factor;
+            newComponents[2] = oldComponents[0]*factor;
+            newComponents[3] = oldComponents[1];
+            break;
+        }
+        case 4:
+        {
+            //RGBA
+            newComponents[0] = oldComponents[0]*factor;
+            newComponents[1] = oldComponents[1]*factor;
+            newComponents[2] = oldComponents[2]*factor;
+            newComponents[3] = oldComponents[3];
+            break;
+        }
+    }
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGColorRef newColor = CGColorCreate(colorSpace, newComponents);
+    CGColorSpaceRelease(colorSpace);
+    
+    UIColor *retColor = [UIColor colorWithCGColor:newColor];
+    CGColorRelease(newColor);
+    
+    return retColor;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -108,7 +193,6 @@
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
     CGFloat panelHeight = 50;   // panel height when no subtitle set
     
-    panel.type = type;
     panel.titleLabel.text = title;
     
     if(subtitle) {
@@ -125,6 +209,7 @@
     
     // update frame of panel
     panel.frame = CGRectMake(0, 0, view.bounds.size.width, panelHeight);
+    panel.type = type;
     [view addSubview:panel];
     
     if (interval > 0) {

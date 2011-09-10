@@ -22,6 +22,7 @@
 
 typedef enum {    
     MKInfoPanelTypeInfo,
+    MKInfoPanelTypeNotice,
     MKInfoPanelTypeError
 } MKInfoPanelType;
 
@@ -56,5 +57,7 @@ typedef enum {
 + (MKInfoPanel *)showPanelInWindow:(UIWindow*)window type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle hideAfter:(NSTimeInterval)interval;
 
 - (void)hidePanel;
+
+-(void)setBackgroundGradientFrom:(UIColor *)fromColor to:(UIColor *)toColor;
 
 @end
