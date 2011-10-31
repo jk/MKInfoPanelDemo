@@ -192,6 +192,7 @@
 +(MKInfoPanel *)showPanelInView:(UIView *)view type:(MKInfoPanelType)type title:(NSString *)title subtitle:(NSString *)subtitle hideAfter:(NSTimeInterval)interval {    
     MKInfoPanel *panel = [MKInfoPanel infoPanel];
     CGFloat panelHeight = 50;   // panel height when no subtitle set
+	CGFloat panelWidht = panel.frame.size.width;
     
     panel.titleLabel.text = title;
     
@@ -208,7 +209,14 @@
     }
     
     // update frame of panel
-    panel.frame = CGRectMake(0, 0, view.bounds.size.width, panelHeight);
+	// TODO: parameterize if the panel should be in full width or just centered in the middle
+	if (YES) { // sorry for this bad hack, I need to center the planel for a project
+		CGFloat x = view.frame.size.width / 2 - panelWidht / 2;
+		panel.frame = CGRectMake(x, 0, panelWidht, panelHeight);
+	} else {
+		panel.frame = CGRectMake(0, 0, view.bounds.size.width, panelHeight);
+	}
+	
     panel.type = type;
     [view addSubview:panel];
     
@@ -244,7 +252,7 @@
 	transition.type = kCATransitionPush;	
 	transition.subtype = kCATransitionFromTop;
 	[self.layer addAnimation:transition forKey:nil];
-    self.frame = CGRectMake(0, -self.frame.size.height, self.frame.size.width, self.frame.size.height); 
+    self.frame = CGRectMake(self.frame.origin.x, -self.frame.size.height, self.frame.size.width, self.frame.size.height); 
     
     [self performSelector:@selector(removeFromSuperview) withObject:nil afterDelay:0.25];
 }
