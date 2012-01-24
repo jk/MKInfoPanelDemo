@@ -218,7 +218,7 @@
 	}
 	
     panel.type = type;
-    [view addSubview:panel];
+	[view performSelectorOnMainThread:@selector(addSubview:) withObject:panel waitUntilDone:YES];
     
     if (interval > 0) {
         [panel performSelector:@selector(hidePanel) withObject:view afterDelay:interval]; 
